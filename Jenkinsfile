@@ -34,8 +34,38 @@ pipeline{
         stage('Docker Build'){
             steps{
                 script{
+                    docker_image = docker.build "${IMAGE_NAME}"
+                }
+            }
+        }
+        stage('Push Docker Image'){
+            steps{
+                script{
+                    
+                    docker.withRegistry('',REGISTRY_CREDS){
+                        docker_image.push("${BUILD_NUMBER}")
+                        docker_image.push('latest')
+                    }
+                }
+            }
+        }
+        stage('Delete Docker images'){
+            steps{
+                script{
 
-                    docker_image = docker.build() "${IMAGE_NAME}"
+                    sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker rmi ${IMAGE_NAME}:latest"
+                }
+            }
+        }
+        stage('Updating Kubernetes Deployment File'){
+            steps{
+                script{
+                    sh"""
+                    cat deployment.yml
+                    sed -i 's/${APP_NAME}.*/${APP_NAME}:${IMAGE_TAG}/g' deployment.yml
+                    cat deployment.yml
+                    """
                 }
             }
         }
