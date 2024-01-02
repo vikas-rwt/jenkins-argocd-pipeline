@@ -58,29 +58,11 @@ pipeline{
                 }
             }
         }
-        stage('Updating Kubernetes Deployment File'){
+        stage('Trigger CD pipeline'){
             steps{
                 script{
-                    sh"""
-                    cat deployment.yml
-                    sed -i 's/${APP_NAME}.*/${APP_NAME}:${IMAGE_TAG}/g' deployment.yml
-                    cat deployment.yml
-                    """
-                }
-            }
-        }
-        stage('Update and push deployment file to Github'){
-            steps{
-                script{
-                    sh"""
-                    git config --global user.name "vikas-rwt"
-                    git config --global user.email "vrwt22@gmail.com"
-                    git add deployment.yml
-                    git commit -m "Updated deployment file"
-                    """
-                    withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
-                        sh "git push https://github.com/vikas-rwt/jenkins-argocd-pipeline.git main"
-                    }
+
+                    sh "curl -v -k -user admin-11482c489c56545d9cbc655e482922677e -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' -data 'IMAGE_TAG=${IMAGE_TAG}' 'http://54.172.171.86:8080/job/gitops/buildWithParameters?token=gitops-token"
                 }
             }
         }
@@ -88,4 +70,5 @@ pipeline{
 }
 
 
-//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
+//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
+//11482c489c56545d9cbc655e482922677e

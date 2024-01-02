@@ -1,0 +1,61 @@
+pipeline{
+
+    agent any
+
+    environment{
+        APP_NAME = "jenkins-argocd"
+    }
+
+    stages{
+
+        stage('Cleanup workspace'){
+
+            steps{
+                script{
+                    cleanWs()
+                }
+            }
+        }
+        stage('Checkout SCM'){
+
+            steps{
+                script{
+                    git credentialsId: 'github',
+                    url: 'https://github.com/vikas-rwt/gitops-argo-CD.git',
+                    branch: 'main'
+                }
+            }
+        }
+        stage('Updating Kubernetes Deployment File'){
+            steps{
+                script{
+                    sh"""
+                    cat deployment.yml
+                    sed -i 's/${APP_NAME}.*/${APP_NAME}:${IMAGE_TAG}/g' deployment.yml
+                    cat deployment.yml
+                    """
+                }
+            }
+        }
+        stage('Update and push deployment file to Github'){
+            steps{
+                script{
+                    sh"""
+                    git config --global user.name "vikas-rwt"
+                    git config --global user.email "vrwt22@gmail.com"
+                    git add deployment.yml
+                    git commit -m "Updated deployment file"
+                    """
+                    withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
+                        sh "git push https://github.com/vikas-rwt/gitops-argo-CD.git main"
+                    }
+                }
+            }
+        }
+        }
+    }
+}
+
+
+//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
+//11482c489c56545d9cbc655e482922677e
