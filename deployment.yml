@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: flask-app-container
-       image: vikasrwt/jenkins-argocd:44
+       image: vikasrwt/jenkins-argocd:45
        resources:
         limits:
           memory: "128Mi"
