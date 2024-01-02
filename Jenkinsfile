@@ -69,8 +69,23 @@ pipeline{
                 }
             }
         }
+        stage('Update and push deployment file to Github'){
+            steps{
+                script{
+                    sh"""
+                    git config --global user.name "vikas-rwt"
+                    git config --global user.email "vrwt22@gmail.com"
+                    git add deployment.yml
+                    git commit -m "Updated deployment file"
+                    """
+                    withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
+                        sh "git push https://github.com/vikas-rwt/jenkins-argocd-pipeline.git main"
+                    }
+                }
+            }
+        }
     }
 }
 
 
-//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
+//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
